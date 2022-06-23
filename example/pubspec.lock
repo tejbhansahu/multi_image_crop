@@ -187,7 +187,7 @@ packages:
   multi_image_crop:
     dependency: "direct dev"
     description:
-      path: "../multi_image_crop"
+      path: ".."
       relative: true
     source: path
     version: "0.0.1"
