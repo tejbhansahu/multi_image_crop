@@ -37,6 +37,13 @@ android {
         jvmTarget = '1.8'
     }
 
+    lintOptions {
+        disable 'InvalidPackage'
+        disable "Instantiatable"
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
