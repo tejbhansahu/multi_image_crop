@@ -13,7 +13,6 @@ Files are stored in cache folders of iOS and Android. Thus if there is a need to
 ensure to copy the file to other location.
 
 All of the computation intensive work is done off a main thread via dispatch queues on iOS and cache thread pool on Android.
-This package use [image_crop](https://pub.dartlang.org/packages/image_crop) package.
 
 ## Credits notice
 
@@ -50,4 +49,4 @@ The following support channels are available at your fingertips:
 
 ## License
 
-This package is released under [The Apache 2.0 License](LICENSE).
+This package is released under [Apache 2.0 License](LICENSE).
