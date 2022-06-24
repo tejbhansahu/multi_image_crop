@@ -4,7 +4,7 @@ A flutter package to crop multiple images at a time on iOS and Android.
 
 ## Features
 
-![Image Cropping Preview](assets/gif.gif)
+![Image Cropping Preview](assets/gif.gif =320x570)
 
 The package comes with a `MultiImageCrop.startCropping()` method. The method crop and filter only images.
 
