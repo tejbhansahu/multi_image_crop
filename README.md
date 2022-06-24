@@ -1,39 +1,53 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# Multi Image Cropper package for Flutter
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A flutter package to crop multiple images at a time on iOS and Android.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+![Image Cropping Preview](assets/gif.gif)
 
-## Getting started
+The package comes with a `MultiImageCrop.startCropping()` method. The method crop and filter only images.
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+The package is working with files to avoid passing large amount of data through method channels.
+Files are stored in cache folders of iOS and Android. Thus if there is a need to save actual croped image,
+ensure to copy the file to other location.
 
-## Usage
+All of the computation intensive work is done off a main thread via dispatch queues on iOS and cache thread pool on Android.
+This package use [image_crop](https://pub.dartlang.org/packages/image_crop) package.
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+## Credits notice
 
+This package use [image_crop](https://pub.dartlang.org/packages/image_crop) plugin,
+original credits goes to him. This plugin fundamentally good in our opinion. The main differences in this package include:
+
+- Multiple image crop
+- Image filters
+
+*Note*: This package is still under development, some features are not available yet and testing has been limited.
+
+## Using
+Create a method and pass list of image or a single image to crop:
 ```dart
-const like = 'sample';
+MultiImageCrop.startCropping(
+    context: context,
+    aspectRatio: 4 / 3,
+    files: List.generate(
+        allImages!.length, (index) => File(allImages![index].path)),
+        callBack: (List<File> images) {
+          setState(() {
+            allCroppedImages = images;
+        })
+    }
+);
 ```
 
-## Additional information
+## Support
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+The following support channels are available at your fingertips:
+
+- [Help on Email](mailto:tejbhansahu0.ts@gmail.com)
+- [Follow on Twitter](https://twitter.com/imTej_Sahu)
+
+## License
+
+This package is released under [The Apache 2.0 License](LICENSE).

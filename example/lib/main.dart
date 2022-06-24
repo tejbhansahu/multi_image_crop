@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
         aspectRatio: 4 / 3,
         files: List.generate(
             receivedFiles!.length, (index) => File(receivedFiles![index].path)),
-        callBak: (List<File> images) {
+        callBack: (List<File> images) {
           setState(() {
             croppedFiles = images;
           });

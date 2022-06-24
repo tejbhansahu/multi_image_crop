@@ -8,7 +8,7 @@ class MultiImageCrop {
   static startCropping({required BuildContext context,
     required List<File> files,
     required double aspectRatio,
-    required Function callBak}) async {
+    required Function callBack}) async {
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -18,7 +18,7 @@ class MultiImageCrop {
                   aspectRatio: aspectRatio,
                 ))).then((value) {
       if (value != null) {
-        callBak(value);
+        callBack(value);
       }
     });
   }
