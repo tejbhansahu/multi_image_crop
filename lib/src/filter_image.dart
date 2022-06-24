@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:multi_image_crop/src/common/util/filters.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'common/util/colors.dart';
 import 'common/util/constants.dart';
 import 'common/widgets/swiping_ui.dart';
@@ -24,6 +25,8 @@ class _FilterImageState extends State<FilterImage> {
   final GlobalKey _globalKey = GlobalKey();
   int selectedFilter = 0;
   ByteData? selectedByteData;
+  AutoScrollController? _autoScrollController;
+  Axis scrollDirection = Axis.horizontal;
 
   List<dynamic> filters = [
     FilterType.NO_FILTER,
@@ -44,6 +47,15 @@ class _FilterImageState extends State<FilterImage> {
     FilterType.FILTER_4,
     FilterType.FILTER_5
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _autoScrollController = AutoScrollController(
+        viewportBoundaryGetter: () =>
+            Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
+        axis: scrollDirection);
+  }
 
   PreferredSizeWidget utilityAppBar() {
     return AppBar(
@@ -119,41 +131,49 @@ class _FilterImageState extends State<FilterImage> {
       color: Colors.black,
       child: ListView.builder(
           itemCount: filters.length,
-          scrollDirection: Axis.horizontal,
+          scrollDirection: scrollDirection,
+          controller: _autoScrollController,
           shrinkWrap: true,
           padding: const EdgeInsets.only(left: 10, right: 10),
           physics: const AlwaysScrollableScrollPhysics(),
           addAutomaticKeepAlives: true,
           itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                setState(() {
-                  selectedFilter = index;
-                });
-              },
-              child: Container(
-                width: 70.0,
-                margin: const EdgeInsets.all(3.0),
-                decoration: BoxDecoration(
-                    color: primaryColor,
-                    border: Border.all(
-                        color: selectedFilter == index
-                            ? Theme.of(context).primaryColor
-                            : Colors.black)),
-                child: ColorFiltered(
-                    colorFilter: ColorFilter.matrix(filters[index]),
-                    child: Image.file(
-                      widget.image,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const SizedBox(
-                            height: 90,
-                            child: Icon(
-                              Icons.error_outline,
-                              color: Colors.white,
-                            ));
-                      },
-                    )),
+            return AutoScrollTag(
+              key: ValueKey(index),
+              controller: _autoScrollController!,
+              index: index,
+              child: InkWell(
+                onTap: () async {
+                  setState(() {
+                    selectedFilter = index;
+                  });
+                  await _autoScrollController!.scrollToIndex(selectedFilter,
+                      preferPosition: AutoScrollPosition.middle);
+                },
+                child: Container(
+                  width: 70.0,
+                  margin: const EdgeInsets.all(3.0),
+                  decoration: BoxDecoration(
+                      color: primaryColor,
+                      border: Border.all(
+                          color: selectedFilter == index
+                              ? Theme.of(context).primaryColor
+                              : Colors.black)),
+                  child: ColorFiltered(
+                      colorFilter: ColorFilter.matrix(filters[index]),
+                      child: Image.file(
+                        widget.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const SizedBox(
+                              height: 90,
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.white,
+                              ));
+                        },
+                      )),
+                ),
               ),
             );
           }),
