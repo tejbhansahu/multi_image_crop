@@ -1,6 +1,6 @@
 name: multi_image_crop
 description: A flutter package to crop multiple images at a time on iOS and Android.
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/tejbhansahu/multi_image_crop
 
 environment:
