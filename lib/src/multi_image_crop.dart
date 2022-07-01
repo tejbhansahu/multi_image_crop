@@ -11,7 +11,6 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'common/util/colors.dart';
 import 'common/widgets/loader_widget.dart';
-import 'common/widgets/swiping_ui.dart';
 
 class MultiImageCropService extends StatefulWidget {
   const MultiImageCropService(
@@ -19,7 +18,7 @@ class MultiImageCropService extends StatefulWidget {
       required this.files,
       required this.aspectRatio,
       this.activeColor,
-      this.alwaysShowGrid = false,
+      required this.alwaysShowGrid,
       this.pixelRatio})
       : super(key: key);
 
@@ -36,15 +35,30 @@ class MultiImageCropService extends StatefulWidget {
 
 class _MultiImageCropServiceState extends State<MultiImageCropService>
     with SingleTickerProviderStateMixin {
+
+  /// [cropKeyList] contains Global key of each crop ui.
   late List<GlobalObjectKey<CropState>> cropKeyList = [];
 
+  /// package [PreloadPageController] is used to preload all images to save time
+  /// of rendering each crop ui.
   final PreloadPageController _pageController = PreloadPageController();
+
+  /// [AnimationController] is used to make smooth transition effect while
+  /// switching between images.
   AnimationController? controller;
+
+  /// [AutoScrollController] is used to scroll thumbnail image without user scroll.
   AutoScrollController? _autoScrollController;
 
+
+  /// Default scrollDirection is Horizontal.
   final scrollDirection = Axis.horizontal;
+
+  /// Variable [currentPage] holds the value of current crop ui.
   int currentPage = 0;
   File? _lastCropped;
+
+  /// [cropFiles] holds the cropped images.
   List<File> cropFiles = [];
   String? mediaType;
   bool isIos = false;
@@ -57,11 +71,19 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
   void initState() {
     super.initState();
     isIos = Platform.isIOS;
+
+    /// Generates key for each crop ui.
     cropKeyList = List.generate(
         files.length, (index) => GlobalObjectKey<CropState>(index));
+
+    /// Finds extension of file, weather it's a image or anything else.
     mediaType = files[0].path.split('.').last;
+
+    /// define animation duration.
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+    /// define viewPort and scrollDirection.
     _autoScrollController = AutoScrollController(
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
@@ -141,6 +163,8 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
   //   );
   // }
 
+
+  /// Crop ui [croppingView] shows all selected images to crop.
   Widget croppingView() {
     String extension = files.isNotEmpty
         ? files[currentPage].path.split('.').last.toLowerCase()
@@ -215,6 +239,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
     ));
   }
 
+  /// [thumbnailsControl] shows image preview of all selected images.
   Widget thumbnailsControl() {
     return Container(
       margin: const EdgeInsets.only(bottom: 20.0),
@@ -267,6 +292,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
     );
   }
 
+  /// Main method [cropImage] responsible for cropping all images.
   cropImage() async {
     showLoaderDialog(context, title: "Please wait..");
     for (int i = 0; i < files.length; i++) {
@@ -293,6 +319,8 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
     Navigator.of(context).pop(cropFiles);
   }
 
+
+  /// List of available options perform on current position image.
   Widget actionBar() {
     return Container(
       color: CustomColors.primaryColorLight,
@@ -337,8 +365,8 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
                               if (kDebugMode) {
                                 print('Filter applied successfully...');
                               }
-                              imageCache!.clearLiveImages();
-                              imageCache!.clear();
+                              imageCache?.clearLiveImages();
+                              imageCache?.clear();
                               setState(() {});
                             },
                           )));
