@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:image_crop/image_crop.dart';
-import 'package:multi_image_crop/src/common/util/constants.dart';
+import 'package:multi_image_crop/src/common/util/colors.dart';
 import 'package:multi_image_crop/src/common/util/fade_page_route.dart';
 import 'package:multi_image_crop/src/filter_image.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -15,11 +15,19 @@ import 'common/widgets/swiping_ui.dart';
 
 class MultiImageCropService extends StatefulWidget {
   const MultiImageCropService(
-      {Key? key, required this.files, required this.aspectRatio})
+      {Key? key,
+      required this.files,
+      required this.aspectRatio,
+      this.activeColor,
+      this.alwaysShowGrid = false,
+      this.pixelRatio})
       : super(key: key);
 
   final List<File> files;
   final double aspectRatio;
+  final double? pixelRatio;
+  final Color? activeColor;
+  final bool alwaysShowGrid;
 
   @override
   State<MultiImageCropService> createState() =>
@@ -39,6 +47,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
   File? _lastCropped;
   List<File> cropFiles = [];
   String? mediaType;
+  bool isIos = false;
 
   List<File> files;
 
@@ -47,6 +56,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
   @override
   void initState() {
     super.initState();
+    isIos = Platform.isIOS;
     cropKeyList = List.generate(
         files.length, (index) => GlobalObjectKey<CropState>(index));
     mediaType = files[0].path.split('.').last;
@@ -72,13 +82,12 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: utilityAppBar(),
-      backgroundColor: Colors.black,
-      floatingActionButton: fab(),
-      body: Column(
-        children: [
-          croppingView(),
-          thumbnailsControl(),
-        ],
+      backgroundColor: CustomColors.primaryColor,
+      // floatingActionButton: fab(),
+      body: SafeArea(
+        child: Column(
+          children: [croppingView(), thumbnailsControl(), actionBar()],
+        ),
       ),
     );
   }
@@ -91,45 +100,46 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
             const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
       elevation: 0,
-      backgroundColor: Colors.black,
+      backgroundColor: CustomColors.primaryColor,
       leading: IconButton(
-        icon: const Icon(CupertinoIcons.clear, color: Colors.white),
+        icon: Icon(isIos ? CupertinoIcons.back : Icons.arrow_back,
+            color: Colors.white),
         onPressed: () {
           Navigator.pop(context);
         },
       ),
-      actions: <Widget>[
-        IconButton(
-          onPressed: () {
-            files.removeAt(currentPage);
-            cropKeyList.removeAt(currentPage);
-            if (files.isNotEmpty) {
-              currentPage = 0;
-            }
-            setState(() {});
-            if (files.isEmpty) Navigator.pop(context);
-          },
-          icon: const Icon(CupertinoIcons.delete, color: Colors.white),
-        ),
-      ],
+      // actions: <Widget>[
+      //   IconButton(
+      //     onPressed: () {
+      //       files.removeAt(currentPage);
+      //       cropKeyList.removeAt(currentPage);
+      //       if (files.isNotEmpty) {
+      //         currentPage = 0;
+      //       }
+      //       setState(() {});
+      //       if (files.isEmpty) Navigator.pop(context);
+      //     },
+      //     icon: const Icon(CupertinoIcons.delete, color: Colors.white),
+      //   ),
+      // ],
     );
   }
 
-  Widget fab() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 100.0),
-      child: FloatingActionButton(
-        heroTag: const ValueKey('fab'),
-        onPressed: () => cropImage(),
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 3.0,
-        child: const Icon(
-          Icons.done,
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
+  // Widget fab() {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 100.0),
+  //     child: FloatingActionButton(
+  //       heroTag: const ValueKey('fab'),
+  //       onPressed: () => cropImage(),
+  //       backgroundColor: Theme.of(context).primaryColor,
+  //       elevation: 3.0,
+  //       child: const Icon(
+  //         Icons.done,
+  //         color: Colors.black,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget croppingView() {
     String extension = files.isNotEmpty
@@ -155,57 +165,52 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
             });
           },
           itemBuilder: (context, index) {
-            return Material(
-              type: MaterialType.transparency,
-              child: Hero(
-                tag: const ValueKey('crop'),
-                child: Crop(
-                  image: FileImage(File(files[index].path)),
-                  key: cropKeyList[index],
-                  aspectRatio: widget.aspectRatio,
-                ),
-              ),
+            return Crop(
+              image: FileImage(File(files[index].path)),
+              key: cropKeyList[index],
+              alwaysShowGrid: widget.alwaysShowGrid,
+              aspectRatio: widget.aspectRatio,
             );
           },
         ),
-        Positioned(
-            bottom: 0,
-            child: Visibility(
-              visible: extension != 'mp4' ||
-                  extension != 'mov' ||
-                  extension != '3gp' ||
-                  extension != 'm3u8' ||
-                  extension != 'avi',
-              child: swapToFilter(
-                  title: 'Swipe up to add filters',
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * 0.15,
-                  direction: DirectionAxis.y,
-                  onTrigger: () => Navigator.push(
-                      context,
-                      FadePageRoute(
-                          fullscreenDialog: true,
-                          builder: (_) => FilterImage(
-                                image: files[currentPage],
-                                onFiltered: (ByteData imageMemory) async {
-                                  final buffer = imageMemory.buffer;
-                                  File tempFile =
-                                      await File(files[currentPage].path)
-                                          .writeAsBytes(buffer.asUint8List(
-                                              imageMemory.offsetInBytes,
-                                              imageMemory.lengthInBytes));
-                                  if (kDebugMode) {
-                                    print('Filter applied successfully...');
-                                  }
-                                  setState(() {
-                                    files[currentPage] = tempFile;
-                                  });
-                                  imageCache!.clearLiveImages();
-                                  imageCache!.clear();
-                                  setState(() {});
-                                },
-                              )))),
-            ))
+        // Positioned(
+        //     bottom: 0,
+        //     child: Visibility(
+        //       visible: extension != 'mp4' ||
+        //           extension != 'mov' ||
+        //           extension != '3gp' ||
+        //           extension != 'm3u8' ||
+        //           extension != 'avi',
+        //       child: swapToFilter(
+        //           title: 'Swipe up to add filters',
+        //           width: MediaQuery.of(context).size.width,
+        //           height: MediaQuery.of(context).size.height * 0.15,
+        //           direction: DirectionAxis.y,
+        //           onTrigger: () => Navigator.push(
+        //               context,
+        //               FadePageRoute(
+        //                   fullscreenDialog: true,
+        //                   builder: (_) => FilterImage(
+        //                         image: files[currentPage],
+        //                         onFiltered: (ByteData imageMemory) async {
+        //                           final buffer = imageMemory.buffer;
+        //                           File tempFile =
+        //                               await File(files[currentPage].path)
+        //                                   .writeAsBytes(buffer.asUint8List(
+        //                                       imageMemory.offsetInBytes,
+        //                                       imageMemory.lengthInBytes));
+        //                           if (kDebugMode) {
+        //                             print('Filter applied successfully...');
+        //                           }
+        //                           setState(() {
+        //                             files[currentPage] = tempFile;
+        //                           });
+        //                           imageCache!.clearLiveImages();
+        //                           imageCache!.clear();
+        //                           setState(() {});
+        //                         },
+        //                       )))),
+        //     ))
       ],
     ));
   }
@@ -214,7 +219,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
     return Container(
       margin: const EdgeInsets.only(bottom: 20.0),
       height: 90.0,
-      color: Colors.black,
+      color: CustomColors.primaryColor,
       child: ListView.builder(
           itemCount: files.length,
           scrollDirection: scrollDirection,
@@ -238,11 +243,11 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
                   width: 70.0,
                   margin: const EdgeInsets.all(3.0),
                   decoration: BoxDecoration(
-                      color: primaryColor,
+                      color: CustomColors.primaryColor,
                       border: Border.all(
                           color: currentPage == index
-                              ? Theme.of(context).primaryColor
-                              : Colors.black)),
+                              ? widget.activeColor ?? CustomColors.activeColor
+                              : CustomColors.primaryColor)),
                   child: Image.file(
                     File(files[index].path),
                     fit: BoxFit.cover,
@@ -286,5 +291,71 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
     }
     Navigator.of(context, rootNavigator: true).pop();
     Navigator.of(context).pop(cropFiles);
+  }
+
+  Widget actionBar() {
+    return Container(
+      color: CustomColors.primaryColorLight,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: () {
+              files.removeAt(currentPage);
+              cropKeyList.removeAt(currentPage);
+              if (files.isNotEmpty) {
+                currentPage = 0;
+              }
+              setState(() {});
+              if (files.isEmpty) Navigator.pop(context);
+            },
+            tooltip: 'Delete',
+            icon: Icon(isIos ? CupertinoIcons.delete : Icons.delete,
+                color: Colors.white),
+          ),
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  FadePageRoute(
+                      fullscreenDialog: true,
+                      builder: (_) => FilterImage(
+                            image: files[currentPage],
+                            pixelRatio: widget.pixelRatio,
+                            activeColor:
+                                widget.activeColor ?? CustomColors.activeColor,
+                            onFiltered: (ByteData imageMemory) async {
+                              final buffer = imageMemory.buffer;
+                              await File(files[currentPage].path).writeAsBytes(
+                                  buffer.asUint8List(imageMemory.offsetInBytes,
+                                      imageMemory.lengthInBytes));
+                              if (kDebugMode) {
+                                print('Filter applied successfully...');
+                              }
+                              imageCache!.clearLiveImages();
+                              imageCache!.clear();
+                              setState(() {});
+                            },
+                          )));
+            },
+            tooltip: 'Edit',
+            icon: Icon(isIos ? CupertinoIcons.pencil : Icons.edit,
+                color: Colors.white),
+          ),
+          IconButton(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            onPressed: () => cropImage(),
+            tooltip: 'Crop',
+            icon: const Icon(Icons.check, color: Colors.white),
+          ),
+        ],
+      ),
+    );
   }
 }

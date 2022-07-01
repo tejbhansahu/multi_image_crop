@@ -30,14 +30,15 @@ Create a method and pass list of image or a single image to crop:
 MultiImageCrop.startCropping(
     context: context,
     aspectRatio: 4 / 3,
+    activeColor: Colors.amber,
+    pixelRatio: 3,
     files: List.generate(
-        allImages!.length, (index) => File(allImages![index].path)),
-        callBack: (List<File> images) {
-          setState(() {
-            allCroppedImages = images;
-        })
-    }
-);
+        receivedFiles!.length, (index) => File(receivedFiles![index].path)),
+    callBack: (List<File> images) {
+      setState(() {
+        croppedFiles = images;
+      });
+    });
 ```
 
 ## Support

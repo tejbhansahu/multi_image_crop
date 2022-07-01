@@ -2,3 +2,8 @@
 
 * Crop multiple images
 * Apply image filters 
+
+## 0.0.2
+
+* Add Image Transformation (Flip, Rotate)
+* Ui Changes

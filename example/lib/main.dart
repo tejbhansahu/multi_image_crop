@@ -66,6 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
     MultiImageCrop.startCropping(
         context: context,
         aspectRatio: 4 / 3,
+        activeColor: Colors.amber,
+        pixelRatio: 3,
         files: List.generate(
             receivedFiles!.length, (index) => File(receivedFiles![index].path)),
         callBack: (List<File> images) {
