@@ -4,6 +4,22 @@ import 'filters.dart';
 enum DirectionAxis { x, xNan, y, yNan }
 enum ActionType { none, filters, transform, text, draw }
 enum TextDirectionValue { left, center, right }
+enum BoxType { white, faintWhite, transparent }
+enum TextWidget {
+  key,
+  text,
+  textSize,
+  align,
+  boxType,
+  borderColorStatus,
+  boxColorIndex,
+  angle,
+  visibility,
+  x,
+  y,
+  xPrev,
+  yPrev
+}
 
 List<Map<String, dynamic>> filters = [
   {"filter": FilterType.NO_FILTER, "name": 'Original'},
