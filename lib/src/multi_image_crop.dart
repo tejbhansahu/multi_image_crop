@@ -287,8 +287,8 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
                               if (kDebugMode) {
                                 print('Filter applied successfully...');
                               }
-                              imageCache?.clearLiveImages();
-                              imageCache?.clear();
+                              imageCache.clearLiveImages();
+                              imageCache.clear();
                               setState(() {});
                             },
                           )));

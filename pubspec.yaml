@@ -24,8 +24,24 @@ flutter:
 
   uses-material-design: true
 
-  fonts:
-    - family: Splash
-      fonts:
-        - asset: assets/fonts/Splash-Regular.ttf
+#  fonts:
+#    - family: Bandar
+#      fonts:
+#        - asset: packages/multi_image_crop/lib/fonts/Bandar.ttf
+#
+#    - family: Darlington
+#      fonts:
+#        - asset: packages/multi_image_crop/lib/fonts/Darlington.ttf
+#
+#    - family: Highup
+#      fonts:
+#        - asset: packages/multi_image_crop/lib/fonts/Highup.ttf
+#
+#    - family: Shoegeking
+#      fonts:
+#        - asset: packages/multi_image_crop/lib/fonts/Shoegeking.otf
+#
+#    - family: Typewriter
+#      fonts:
+#        - asset: packages/multi_image_crop/lib/fonts/Typewriter.ttf
 

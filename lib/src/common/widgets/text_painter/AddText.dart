@@ -2,9 +2,9 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_image_crop/src/common/util/constants.dart';
-import '../util/colors.dart';
-import 'available_options_container.dart';
-import 'icon_button.dart';
+import '../../util/colors.dart';
+import '../available_options_container.dart';
+import '../icon_button.dart';
 
 class AddText extends StatefulWidget {
   const AddText({Key? key, required this.activeColor, this.initialData})
@@ -23,7 +23,7 @@ class _AddTextState extends State<AddText> {
   TextDirectionValue _textDirectionValue = TextDirectionValue.center;
   TextEditingController textEditingController = TextEditingController();
   FocusNode textFieldNode = FocusNode();
-  int selectedColorIndex = 0;
+  int selectedColorIndex = 0, selectedFont = 1;
 
   @override
   void initState() {
@@ -85,7 +85,8 @@ class _AddTextState extends State<AddText> {
                             ? Colors.white
                             : Colors.black,
                         fontSize: 40,
-                        fontFamily: fonts[1]),
+                        package: "multi_image_crop",
+                        fontFamily: fonts[selectedFont]),
                     textAlign: _textDirectionValue == TextDirectionValue.left
                         ? TextAlign.left
                         : _textDirectionValue == TextDirectionValue.center
@@ -142,17 +143,16 @@ class _AddTextState extends State<AddText> {
                                   })),
                           TextButton(
                               onPressed: () {
-                                // if (selectedFont < 11) {
+                                // if (selectedFont < 6) {
                                 //   setState(() => selectedFont++);
                                 // } else {
                                 //   setState(() => selectedFont = 1);
                                 // }
                               },
                               child: Text(
-                                'Default',
-                                // "Font $selectedFont",
+                                fonts[selectedFont]!,
                                 style: TextStyle(
-                                    fontFamily: fonts[1], color: Colors.white),
+                                    fontFamily: fonts[selectedFont], color: Colors.white),
                               )),
                           CustomIconButton(
                               icon: (_boxType == BoxType.white

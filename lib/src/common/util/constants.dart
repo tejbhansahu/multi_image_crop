@@ -42,15 +42,10 @@ List<Map<String, dynamic>> filters = [
 ];
 
 Map<int, String> fonts = {
-  1: CustomFonts.font1,
-  // 2: CustomFonts.font2,
-  // 3: CustomFonts.font3,
-  // 4: CustomFonts.font4,
-  // 5: CustomFonts.font5,
-  // 6: CustomFonts.font6,
-  // 7: CustomFonts.font7,
-  // 8: CustomFonts.font8,
-  // 9: CustomFonts.font9,
-  // 10: CustomFonts.font10,
-  // 11: CustomFonts.font11
+  1: CustomFonts.font6,
+  2: CustomFonts.font2,
+  3: CustomFonts.font3,
+  4: CustomFonts.font4,
+  5: CustomFonts.font5,
+  6: CustomFonts.font1
 };

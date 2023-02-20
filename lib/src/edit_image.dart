@@ -8,11 +8,9 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'common/util/colors.dart';
 import 'common/util/constants.dart';
 import 'dart:math' as math;
-import 'dart:typed_data';
-import 'dart:developer' as developer;
 import 'dart:ui' as ui;
-import 'common/widgets/AddText.dart';
 import 'common/widgets/icon_button.dart';
+import 'common/widgets/text_painter/AddText.dart';
 
 class EditImage extends StatefulWidget {
   const EditImage(
@@ -48,6 +46,7 @@ class _EditImageState extends State<EditImage> {
   /// [_rotationController] used to find the offset of current index level
   /// to rotate selected image.
   final ScrollController _rotationController = ScrollController();
+  final ScrollController _textRotationController = ScrollController();
 
   /// Default scrollDirection.
   Axis scrollDirection = Axis.horizontal;
@@ -64,6 +63,7 @@ class _EditImageState extends State<EditImage> {
   bool isRotationActive = false, isEditorEnable = false;
 
   List<Map<TextWidget, dynamic>> textWidgets = [];
+  int? currentTextIndex;
 
   @override
   void initState() {
@@ -73,6 +73,16 @@ class _EditImageState extends State<EditImage> {
         rotationValue = _rotationController.offset / 100;
       });
     });
+
+    _textRotationController.addListener(() {
+      if (currentTextIndex != null) {
+        setState(() {
+          textWidgets[currentTextIndex!][TextWidget.angle] =
+              _textRotationController.offset / 100;
+        });
+      }
+    });
+
     _autoScrollController = AutoScrollController(
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
@@ -205,16 +215,17 @@ class _EditImageState extends State<EditImage> {
                     }
                     setState(() {
                       isEditorEnable = false;
+                      currentTextIndex = textWidgets.length - 1;
                     });
                   });
                 }),
-            CustomIconButton(
-                icon: CupertinoIcons.hand_draw,
-                inActiveColor: CustomColors.secondaryColor,
-                activeColor: widget.activeColor ?? CustomColors.activeColor,
-                toolTip: 'Draw',
-                isActive: _selectedAction == ActionType.draw,
-                onTap: () => setState(() => _selectedAction = ActionType.draw)),
+            // CustomIconButton(
+            //     icon: CupertinoIcons.hand_draw,
+            //     inActiveColor: CustomColors.secondaryColor,
+            //     activeColor: widget.activeColor ?? CustomColors.activeColor,
+            //     toolTip: 'Draw',
+            //     isActive: _selectedAction == ActionType.draw,
+            //     onTap: () => setState(() => _selectedAction = ActionType.draw)),
           ],
         ),
       ),
@@ -316,95 +327,97 @@ class _EditImageState extends State<EditImage> {
                 ),
               ),
             ),
-            Container(
-              height: 45,
-              width: MediaQuery.of(context).size.width * 0.85,
-              margin: const EdgeInsets.only(bottom: 10),
-              child: Stack(
+            changeAngleWidget(_rotationController),
+          ],
+        ));
+  }
+
+  Widget changeAngleWidget(ScrollController controller) {
+    return Container(
+      height: 45,
+      width: MediaQuery.of(context).size.width * 0.85,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: 25,
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: 95,
+                    controller: controller,
+                    itemBuilder: (context, index) => Container(
+                          width: 10,
+                          color: Colors.transparent,
+                          child: const VerticalDivider(
+                            color: Colors.white,
+                            thickness: 1,
+                            indent: 7.5,
+                            endIndent: 7.5,
+                          ),
+                        ))),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 50,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: 25,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: 95,
-                            controller: _rotationController,
-                            itemBuilder: (context, index) => Container(
-                                  width: 10,
-                                  color: Colors.transparent,
-                                  child: const VerticalDivider(
-                                    color: Colors.white,
-                                    thickness: 1,
-                                    indent: 7.5,
-                                    endIndent: 7.5,
-                                  ),
-                                ))),
+                  Text(
+                    "${(rotationValue * 57.3).toStringAsFixed(1)}°",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: widget.activeColor ?? CustomColors.activeColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: 50,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${(rotationValue * 57.3).toStringAsFixed(1)}°",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: widget.activeColor ??
-                                    CustomColors.activeColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(
-                            height: 5.0,
-                          ),
-                          Container(
-                            height: 15,
-                            width: 1.5,
-                            color:
-                                widget.activeColor ?? CustomColors.activeColor,
-                          )
-                        ],
-                      ),
-                    ),
+                  const SizedBox(
+                    height: 5.0,
                   ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: 90,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [
-                          CustomColors.primaryColor.withOpacity(0.9),
-                          CustomColors.primaryColor.withOpacity(0.3)
-                        ]),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Container(
-                      width: 90,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            transform: const GradientRotation(3.14159),
-                            colors: [
-                              CustomColors.primaryColor.withOpacity(0.9),
-                              CustomColors.primaryColor.withOpacity(0.3)
-                            ]),
-                      ),
-                    ),
-                  ),
+                  Container(
+                    height: 15,
+                    width: 1.5,
+                    color: widget.activeColor ?? CustomColors.activeColor,
+                  )
                 ],
               ),
             ),
-          ],
-        ));
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: 90,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  CustomColors.primaryColor.withOpacity(0.9),
+                  CustomColors.primaryColor.withOpacity(0.3)
+                ]),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: 90,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    transform: const GradientRotation(3.14159),
+                    colors: [
+                      CustomColors.primaryColor.withOpacity(0.9),
+                      CustomColors.primaryColor.withOpacity(0.3)
+                    ]),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget allFilters() {
@@ -494,77 +507,100 @@ class _EditImageState extends State<EditImage> {
   Widget text() {
     return Visibility(
       visible: _selectedAction == ActionType.text && !isEditorEnable,
-      child: AvailableOptions(
-          child: const Text(
-            'Add Text',
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          padding:
-              const EdgeInsets.only(left: 40, right: 40, top: 10, bottom: 10),
-          onTap: () {
-            setState(() {
-              isEditorEnable = true;
-            });
-            Navigator.of(context)
-                .push(
-              PageRouteBuilder(
-                opaque: false,
-                pageBuilder: (_, __, ___) => AddText(
-                    activeColor:
-                        widget.activeColor ?? CustomColors.activeColor),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Visibility(
+              visible: currentTextIndex != null,
+              child: changeAngleWidget(_textRotationController)),
+          AvailableOptions(
+              child: const Text(
+                'Add Text',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
               ),
-            )
-                .then((value) {
-              if (value != null) {
-                Map<TextWidget, dynamic> map;
-                map = value;
-                map.addAll({
-                  TextWidget.x: 100.0,
-                  TextWidget.y: 100.0,
-                  TextWidget.xPrev: 100.0,
-                  TextWidget.yPrev: 100.0,
-                  TextWidget.angle: 0.0
+              padding: const EdgeInsets.only(
+                  left: 40, right: 40, top: 10, bottom: 10),
+              onTap: () {
+                setState(() {
+                  isEditorEnable = true;
                 });
-                textWidgets.add(map);
-              }
-              setState(() {
-                isEditorEnable = false;
-              });
-            });
-          }),
+                Navigator.of(context)
+                    .push(
+                  PageRouteBuilder(
+                    opaque: false,
+                    pageBuilder: (_, __, ___) => AddText(
+                        activeColor:
+                            widget.activeColor ?? CustomColors.activeColor),
+                  ),
+                )
+                    .then((value) {
+                  if (value != null) {
+                    Map<TextWidget, dynamic> map;
+                    map = value;
+                    map.addAll({
+                      TextWidget.x: 100.0,
+                      TextWidget.y: 100.0,
+                      TextWidget.xPrev: 100.0,
+                      TextWidget.yPrev: 100.0,
+                      TextWidget.angle: 0.0
+                    });
+                    textWidgets.add(map);
+                  }
+                  setState(() {
+                    isEditorEnable = false;
+                    currentTextIndex = textWidgets.length - 1;
+                  });
+                });
+              }),
+        ],
+      ),
     );
   }
 
   Widget paintBoundary() {
-    return Stack(
-      children: [
-        Align(
-          alignment: Alignment.center,
-          child: RepaintBoundary(
-            key: _globalKey,
-            child: Stack(
-              children: [
-                Transform.rotate(
-                  angle: absoluteRotation * math.pi / 180,
-                  child: Transform.scale(
-                    scaleX: scaleX,
-                    scaleY: scaleY,
-                    child: Transform.rotate(
-                      angle: rotationValue,
-                      child: ColorFiltered(
-                          colorFilter: ColorFilter.matrix(
-                              filters[selectedFilter]['filter']),
-                          child: Image.file(widget.image)),
+    return GestureDetector(
+      onTap: () {
+        if (textWidgets.isNotEmpty) {
+          setState(() {
+            for (var v in textWidgets) {
+              v[TextWidget.borderColorStatus] = false;
+              currentTextIndex = null;
+            }
+          });
+        }
+      },
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.center,
+            child: RepaintBoundary(
+              key: _globalKey,
+              child: Stack(
+                children: [
+                  Transform.rotate(
+                    angle: absoluteRotation * math.pi / 180,
+                    child: Transform.scale(
+                      scaleX: scaleX,
+                      scaleY: scaleY,
+                      child: Transform.rotate(
+                        angle: rotationValue,
+                        child: ColorFiltered(
+                            colorFilter: ColorFilter.matrix(
+                                filters[selectedFilter]['filter']),
+                            child: Image.file(widget.image)),
+                      ),
                     ),
                   ),
-                ),
-                ...textPainter(),
-              ],
+                  ...textPainter(),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -583,22 +619,10 @@ class _EditImageState extends State<EditImage> {
                         textWidgets[index][TextWidget.x];
                     textWidgets[index][TextWidget.yPrev] =
                         textWidgets[index][TextWidget.y];
-                    textWidgets[index][TextWidget.borderColorStatus] = true;
                   },
-                  onHorizontalDragEnd: (details) async {
-                    await Future.delayed(const Duration(seconds: 3))
-                        .then((value) {
-                      if (textWidgets.isNotEmpty) {
-                        setState(() {
-                          textWidgets[index][TextWidget.borderColorStatus] =
-                              false;
-                        });
-                      }
-                    });
-                  },
+                  onHorizontalDragEnd: (details) {},
                   onHorizontalDragUpdate: (details) {
                     setState(() {
-                      textWidgets[index][TextWidget.borderColorStatus] = true;
                       textWidgets[index][TextWidget.x] = textWidgets[index]
                               [TextWidget.xPrev] +
                           details.localPosition.dx;
@@ -607,20 +631,9 @@ class _EditImageState extends State<EditImage> {
                           details.localPosition.dy;
                     });
                   },
-                  onVerticalDragEnd: (details) async {
-                    await Future.delayed(const Duration(seconds: 3))
-                        .then((value) {
-                      if (textWidgets.isNotEmpty) {
-                        setState(() {
-                          textWidgets[index][TextWidget.borderColorStatus] =
-                              false;
-                        });
-                      }
-                    });
-                  },
+                  onVerticalDragEnd: (details) {},
                   onVerticalDragUpdate: (details) {
                     setState(() {
-                      textWidgets[index][TextWidget.borderColorStatus] = true;
                       textWidgets[index][TextWidget.x] = textWidgets[index]
                               [TextWidget.xPrev] +
                           details.localPosition.dx;
@@ -630,59 +643,76 @@ class _EditImageState extends State<EditImage> {
                     });
                   },
                   onTap: () {
-                    setState(() {
-                      isEditorEnable = true;
-                      textWidgets[index][TextWidget.visibility] = false;
-                    });
-                    Navigator.of(context)
-                        .push(
-                      PageRouteBuilder(
-                        opaque: false,
-                        pageBuilder: (_, __, ___) => AddText(
-                            initialData: {
-                              TextWidget.key: textWidgets[index]
-                                  [TextWidget.key],
-                              TextWidget.text: textWidgets[index]
-                                  [TextWidget.text],
-                              TextWidget.align: textWidgets[index]
-                                  [TextWidget.align],
-                              TextWidget.boxType: textWidgets[index]
-                                  [TextWidget.boxType],
-                              TextWidget.borderColorStatus: textWidgets[index]
-                                  [TextWidget.borderColorStatus],
-                              TextWidget.boxColorIndex: textWidgets[index]
-                                  [TextWidget.boxColorIndex],
-                              TextWidget.visibility: textWidgets[index]
-                                  [TextWidget.visibility],
-                              TextWidget.textSize: textWidgets[index]
-                                  [TextWidget.textSize]
-                            },
-                            activeColor:
-                                widget.activeColor ?? CustomColors.activeColor),
-                      ),
-                    )
-                        .then((value) {
-                      if (value != null) {
-                        Map<TextWidget, dynamic> map;
-                        map = value;
-                        map.addAll({
-                          TextWidget.x:
-                              textWidgets[index][TextWidget.x] ?? 100.0,
-                          TextWidget.y:
-                              textWidgets[index][TextWidget.y] ?? 100.0,
-                          TextWidget.xPrev:
-                              textWidgets[index][TextWidget.xPrev] ?? 100.0,
-                          TextWidget.yPrev:
-                              textWidgets[index][TextWidget.yPrev] ?? 100.0,
-                          TextWidget.angle:
-                              textWidgets[index][TextWidget.angle] ?? 0.0,
-                        });
-                        textWidgets[index] = map;
-                      }
+                    if (textWidgets[index][TextWidget.borderColorStatus]) {
                       setState(() {
-                        isEditorEnable = false;
+                        isEditorEnable = true;
+                        textWidgets[index][TextWidget.visibility] = false;
                       });
-                    });
+                      Navigator.of(context)
+                          .push(
+                        PageRouteBuilder(
+                          opaque: false,
+                          pageBuilder: (_, __, ___) => AddText(
+                              initialData: {
+                                TextWidget.key: textWidgets[index]
+                                    [TextWidget.key],
+                                TextWidget.text: textWidgets[index]
+                                    [TextWidget.text],
+                                TextWidget.align: textWidgets[index]
+                                    [TextWidget.align],
+                                TextWidget.boxType: textWidgets[index]
+                                    [TextWidget.boxType],
+                                TextWidget.borderColorStatus: textWidgets[index]
+                                    [TextWidget.borderColorStatus],
+                                TextWidget.boxColorIndex: textWidgets[index]
+                                    [TextWidget.boxColorIndex],
+                                TextWidget.visibility: textWidgets[index]
+                                    [TextWidget.visibility],
+                                TextWidget.textSize: textWidgets[index]
+                                    [TextWidget.textSize]
+                              },
+                              activeColor: widget.activeColor ??
+                                  CustomColors.activeColor),
+                        ),
+                      )
+                          .then((value) {
+                        if (value != null) {
+                          Map<TextWidget, dynamic> map;
+                          map = value;
+                          map.addAll({
+                            TextWidget.x:
+                                textWidgets[index][TextWidget.x] ?? 100.0,
+                            TextWidget.y:
+                                textWidgets[index][TextWidget.y] ?? 100.0,
+                            TextWidget.xPrev:
+                                textWidgets[index][TextWidget.xPrev] ?? 100.0,
+                            TextWidget.yPrev:
+                                textWidgets[index][TextWidget.yPrev] ?? 100.0,
+                            TextWidget.angle:
+                                textWidgets[index][TextWidget.angle] ?? 0.0,
+                          });
+                          textWidgets[index] = map;
+                        }
+                        setState(() {
+                          isEditorEnable = false;
+                          currentTextIndex = textWidgets.length - 1;
+                        });
+                      });
+                    } else {
+                      if (textWidgets.isNotEmpty) {
+                        for (var i = 0; i < textWidgets.length; i++) {
+                          if (i == index) {
+                            textWidgets[i][TextWidget.borderColorStatus] = true;
+                            setState(() {
+                              currentTextIndex = i;
+                            });
+                          } else {
+                            textWidgets[i][TextWidget.borderColorStatus] =
+                                false;
+                          }
+                        }
+                      }
+                    }
                   },
                   child: textWidgets.isNotEmpty
                       ? Transform.rotate(
@@ -690,57 +720,49 @@ class _EditImageState extends State<EditImage> {
                           child: Stack(
                             children: [
                               Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 10, top: 5, bottom: 5),
+                                margin: const EdgeInsets.only(
+                                    left: 5, right: 5, top: 5, bottom: 5),
                                 decoration: BoxDecoration(
-                                    border: Border.all(
-                                  width: 1,
-                                  color: textWidgets[index]
-                                          [TextWidget.borderColorStatus]
-                                      ? Colors.transparent
-                                      : Colors.transparent,
-                                )),
-                                child: Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10, top: 5, bottom: 5),
-                                  margin: const EdgeInsets.only(
-                                      left: 5, right: 5, top: 5, bottom: 5),
-                                  decoration: BoxDecoration(
-                                      color: textWidgets[index]
-                                                  [TextWidget.boxType] ==
-                                              BoxType.white
-                                          ? CustomColors.allColors[
-                                              textWidgets[index]
-                                                  [TextWidget.boxColorIndex]]
-                                          : textWidgets[index]
-                                                      [TextWidget.boxType] ==
-                                                  BoxType.faintWhite
-                                              ? CustomColors
-                                                  .allColors[textWidgets[index][
-                                                      TextWidget.boxColorIndex]]
-                                                  .withOpacity(0.6)
-                                              : Colors.transparent,
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(6.0))),
-                                  child: Center(
-                                    child: Text(
-                                      textWidgets[index][TextWidget.text],
-                                      textAlign: textWidgets[index]
-                                                  [TextWidget.align] ==
-                                              TextDirectionValue.left
-                                          ? TextAlign.left
-                                          : textWidgets[index]
-                                                      [TextWidget.align] ==
-                                                  TextDirectionValue.center
-                                              ? TextAlign.center
-                                              : TextAlign.right,
-                                      style: TextStyle(
-                                          fontSize: textWidgets[index]
-                                              [TextWidget.textSize],
-                                          color: textWidgets[index][TextWidget
-                                                      .boxColorIndex] ==
-                                                  1
-                                              ? Colors.white
-                                              : Colors.black),
-                                    ),
+                                    color: textWidgets[index]
+                                                [TextWidget.boxType] ==
+                                            BoxType.white
+                                        ? CustomColors.allColors[
+                                            textWidgets[index]
+                                                [TextWidget.boxColorIndex]]
+                                        : textWidgets[index]
+                                                    [TextWidget.boxType] ==
+                                                BoxType.faintWhite
+                                            ? CustomColors
+                                                .allColors[textWidgets[index]
+                                                    [TextWidget.boxColorIndex]]
+                                                .withOpacity(0.6)
+                                            : Colors.transparent,
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0))),
+                                child: Center(
+                                  child: Text(
+                                    textWidgets[index][TextWidget.text],
+                                    textAlign: textWidgets[index]
+                                                [TextWidget.align] ==
+                                            TextDirectionValue.left
+                                        ? TextAlign.left
+                                        : textWidgets[index]
+                                                    [TextWidget.align] ==
+                                                TextDirectionValue.center
+                                            ? TextAlign.center
+                                            : TextAlign.right,
+                                    style: TextStyle(
+                                        fontFamily: "Highup",
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: textWidgets[index]
+                                            [TextWidget.textSize],
+                                        color: textWidgets[index][
+                                                    TextWidget.boxColorIndex] ==
+                                                1
+                                            ? Colors.white
+                                            : Colors.black),
                                   ),
                                 ),
                               ),
@@ -749,53 +771,13 @@ class _EditImageState extends State<EditImage> {
                                     [TextWidget.borderColorStatus],
                                 child: Positioned(
                                   top: 0,
-                                  child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onPanDown: (details) {
-                                      developer.log(
-                                          "Down - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onHorizontalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateH - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onVerticalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateV - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.grey)),
-                                    ),
+                                  child: Container(
+                                    height: 15,
+                                    width: 15,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.grey)),
                                   ),
                                 ),
                               ),
@@ -833,52 +815,13 @@ class _EditImageState extends State<EditImage> {
                                 child: Positioned(
                                   bottom: 0,
                                   left: 0,
-                                  child: GestureDetector(
-                                    onPanDown: (details) {
-                                      developer.log(
-                                          "Down - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onHorizontalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateH - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onVerticalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateV - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.grey)),
-                                    ),
+                                  child: Container(
+                                    height: 15,
+                                    width: 15,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.grey)),
                                   ),
                                 ),
                               ),
@@ -888,52 +831,13 @@ class _EditImageState extends State<EditImage> {
                                 child: Positioned(
                                   bottom: 0,
                                   right: 0,
-                                  child: GestureDetector(
-                                    onPanDown: (details) {
-                                      developer.log(
-                                          "Down - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onHorizontalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateH - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    onVerticalDragUpdate: (details) {
-                                      developer.log(
-                                          "UpdateV - ${textWidgets[index][TextWidget.x]}"
-                                          " : ${textWidgets[index][TextWidget.y]}"
-                                          " == ${details.localPosition.dx} : "
-                                          "${details.localPosition.dy} ${details.localPosition.dy * (math.pi / 180)}");
-                                      setState(() {
-                                        textWidgets[index][TextWidget.angle] =
-                                            (360 - details.localPosition.dy) *
-                                                (math.pi / 180);
-                                      });
-                                    },
-                                    child: Container(
-                                      height: 15,
-                                      width: 15,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.grey)),
-                                    ),
+                                  child: Container(
+                                    height: 15,
+                                    width: 15,
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.grey)),
                                   ),
                                 ),
                               )
