@@ -20,7 +20,8 @@ class MultiImageCropService extends StatefulWidget {
       required this.aspectRatio,
       this.activeColor,
       required this.alwaysShowGrid,
-      this.pixelRatio})
+      this.pixelRatio, 
+      this.titleVisible = true})
       : super(key: key);
 
   final List<File> files;
@@ -28,6 +29,7 @@ class MultiImageCropService extends StatefulWidget {
   final double? pixelRatio;
   final Color? activeColor;
   final bool alwaysShowGrid;
+  final bool titleVisible;
 
   @override
   State<MultiImageCropService> createState() =>
@@ -112,11 +114,11 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
 
   PreferredSizeWidget utilityAppBar() {
     return AppBar(
-      title: Text(
+      title: titleVisible ? Text(
         files.length.toString(),
         style:
             const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-      ),
+      ) : null,
       elevation: 0,
       backgroundColor: CustomColors.primaryColor,
       leading: IconButton(
