@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import '../util/colors.dart';
 
 class AvailableOptions extends StatelessWidget {
-  const AvailableOptions(
-      {Key? key,
-      required this.child,
-      required this.onTap,
-      this.padding = EdgeInsets.zero})
-      : super(key: key);
+  const AvailableOptions({
+    Key? key,
+    required this.child,
+    required this.onTap,
+    this.padding = EdgeInsets.zero,
+  }) : super(key: key);
 
   final Widget child;
   final VoidCallback onTap;
@@ -21,10 +21,10 @@ class AvailableOptions extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 20),
         padding: padding,
         decoration: BoxDecoration(
-            color: Colors.black26,
-            borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-            border:
-                Border.all(width: 1, color: CustomColors.primaryColorLight)),
+          color: Colors.black26,
+          borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+          border: Border.all(color: CustomColors.primaryColorLight),
+        ),
         child: child,
       ),
     );

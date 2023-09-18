@@ -63,17 +63,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void chooseImage() async {
     receivedFiles = await _picker.pickMultiImage();
-    MultiImageCrop.startCropping(
-        context: context,
-        aspectRatio: 4 / 3,
-        activeColor: Colors.amber,
-        pixelRatio: 3,
-        files: List.generate(
-            receivedFiles!.length, (index) => File(receivedFiles![index].path)),
-        callBack: (List<File> images) {
-          setState(() {
-            croppedFiles = images;
+
+    if (receivedFiles != null && (receivedFiles?.isNotEmpty ?? false)) {
+      MultiImageCrop.startCropping(
+          context: context,
+          aspectRatio: 4 / 3,
+          activeColor: Colors.amber,
+          pixelRatio: 3,
+          files: List.generate(receivedFiles!.length,
+              (index) => File(receivedFiles![index].path)),
+          callBack: (List<File> images) {
+            setState(() {
+              croppedFiles = images;
+            });
           });
-        });
+    }
   }
 }

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 Future<dynamic> showLoaderDialog(
   BuildContext context, {
   required String title,
-  String? defaultActionText,
-  String? cancelActionText,
 }) {
   return showDialog(
     context: context,

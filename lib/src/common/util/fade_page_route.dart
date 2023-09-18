@@ -48,8 +48,10 @@ class FadePageRoute<T> extends PageRoute<T> {
             'The builder for route "${settings.name}" returned null.\n'
             'Route builders must never return null.');
       }
+
       return true;
     }());
+
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
@@ -58,8 +60,12 @@ class FadePageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
 //    final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return _FadeInPageTransition(routeAnimation: animation, child: child);
   }
@@ -78,12 +84,12 @@ class _FadeInPageTransition extends StatelessWidget {
         super(key: key);
 
   // Fractional offset from 1/4 screen below the top to fully on screen.
-  static final Tween<Offset> _bottomUpTween = Tween<Offset>(
-    begin: const Offset(0.0, 0.25),
-    end: Offset.zero,
-  );
-  static final Animatable<double> _fastOutSlowInTween =
-      CurveTween(curve: Curves.fastOutSlowIn);
+  // static final Tween<Offset> _bottomUpTween = Tween<Offset>(
+  //   begin: const Offset(0.0, 0.25),
+  //   end: Offset.zero,
+  // );
+  // static final Animatable<double> _fastOutSlowInTween =
+  //     CurveTween(curve: Curves.fastOutSlowIn);
   static final Animatable<double> _easeInTween =
       CurveTween(curve: Curves.easeIn);
 

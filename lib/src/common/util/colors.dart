@@ -31,6 +31,6 @@ class CustomColors {
     Color(0xFFD898E8),
     Color(0xFF9860B8),
     Color(0xFFFE4178),
-    Color(0xFF41FEC7)
+    Color(0xFF41FEC7),
   ];
 }

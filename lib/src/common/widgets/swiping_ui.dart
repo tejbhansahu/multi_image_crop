@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:multi_image_crop/src/common/util/constants.dart';
 
-Widget swapToFilter(
-    {required String title,
-    required DirectionAxis direction,
-    required double width,
-    double? height,
-    required VoidCallback onTrigger}) {
+Widget swapToFilter({
+  required String title,
+  required DirectionAxis direction,
+  required double width,
+  double? height,
+  required VoidCallback onTrigger,
+}) {
   return Visibility(
     child: GestureDetector(
       onPanUpdate: (details) {
@@ -42,7 +43,6 @@ Widget swapToFilter(
         width: width,
         height: height,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -55,7 +55,6 @@ Widget swapToFilter(
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Visibility(
                   visible: direction == DirectionAxis.xNan,
@@ -67,13 +66,14 @@ Widget swapToFilter(
                 Container(
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(20)),
-                      boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 20,
-                      spreadRadius: 15,
-                    )
-                  ]),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 20,
+                        spreadRadius: 15,
+                      ),
+                    ],
+                  ),
                   child: Text(
                     title,
                     style: const TextStyle(color: Colors.white),

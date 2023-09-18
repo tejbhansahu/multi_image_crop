@@ -10,16 +10,16 @@ import 'common/util/constants.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'common/widgets/icon_button.dart';
-import 'common/widgets/text_painter/AddText.dart';
+import 'common/widgets/text_painter/add_text.dart';
 
 class EditImage extends StatefulWidget {
-  const EditImage(
-      {Key? key,
-      required this.image,
-      required this.onFiltered,
-      this.activeColor,
-      this.pixelRatio})
-      : super(key: key);
+  const EditImage({
+    Key? key,
+    required this.image,
+    required this.onFiltered,
+    this.activeColor,
+    this.pixelRatio,
+  }) : super(key: key);
 
   final File image;
   final double? pixelRatio;
@@ -57,10 +57,14 @@ class _EditImageState extends State<EditImage> {
   /// [rotationValue] is value of image rotated in degree and [absoluteRotation]
   /// is value of image rotated in multiples of 90 degree.
   /// [scaleX] and [scaleY] boolean value use to flip the images.
-  double rotationValue = 0, absoluteRotation = 0, scaleX = 1, scaleY = 1;
+  double rotationValue = 0;
+  double absoluteRotation = 0;
+  double scaleX = 1;
+  double scaleY = 1;
 
   /// [isRotationActive] is use to show active color of icon.
-  bool isRotationActive = false, isEditorEnable = false;
+  bool isRotationActive = false;
+  bool isEditorEnable = false;
 
   List<Map<TextWidget, dynamic>> textWidgets = [];
   int? currentTextIndex;
@@ -84,9 +88,10 @@ class _EditImageState extends State<EditImage> {
     });
 
     _autoScrollController = AutoScrollController(
-        viewportBoundaryGetter: () =>
-            Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
-        axis: scrollDirection);
+      viewportBoundaryGetter: () =>
+          Rect.fromLTRB(0, 0, MediaQuery.of(context).padding.bottom, 0),
+      axis: scrollDirection,
+    );
   }
 
   @override
@@ -102,15 +107,16 @@ class _EditImageState extends State<EditImage> {
       backgroundColor: CustomColors.primaryColor,
       appBar: utilityAppBar(),
       body: SafeArea(
-          child: Column(
-        children: <Widget>[
-          Expanded(
-            child: paintBoundary(),
-          ),
-          allActionUi(),
-          bottomActionPane()
-        ],
-      )),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: paintBoundary(),
+            ),
+            allActionUi(),
+            bottomActionPane(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -130,21 +136,23 @@ class _EditImageState extends State<EditImage> {
       ),
       actions: <Widget>[
         TextButton(
-            onPressed: () {
-              if (true) {
-                _capturePngToByteData().then((value) {
-                  widget.onFiltered(value);
-                });
-              }
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                  color: CustomColors.secondaryColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
-            )),
+          onPressed: () {
+            if (true) {
+              _capturePngToByteData().then((value) {
+                widget.onFiltered(value);
+              });
+            }
+            Navigator.pop(context);
+          },
+          child: const Text(
+            'Save',
+            style: TextStyle(
+              color: CustomColors.secondaryColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -162,63 +170,65 @@ class _EditImageState extends State<EditImage> {
         color: CustomColors.primaryColorLight,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomIconButton(
-                icon: CupertinoIcons.crop_rotate,
-                inActiveColor: CustomColors.secondaryColor,
-                activeColor: widget.activeColor ?? CustomColors.activeColor,
-                toolTip: 'Transform',
-                isActive: _selectedAction == ActionType.transform,
-                onTap: () =>
-                    setState(() => _selectedAction = ActionType.transform)),
+              icon: CupertinoIcons.crop_rotate,
+              inActiveColor: CustomColors.secondaryColor,
+              activeColor: widget.activeColor ?? CustomColors.activeColor,
+              toolTip: 'Transform',
+              isActive: _selectedAction == ActionType.transform,
+              onTap: () =>
+                  setState(() => _selectedAction = ActionType.transform),
+            ),
             CustomIconButton(
-                icon: CupertinoIcons.color_filter,
-                inActiveColor: CustomColors.secondaryColor,
-                activeColor: widget.activeColor ?? CustomColors.activeColor,
-                toolTip: 'Filters',
-                isActive: _selectedAction == ActionType.filters,
-                onTap: () =>
-                    setState(() => _selectedAction = ActionType.filters)),
+              icon: CupertinoIcons.color_filter,
+              inActiveColor: CustomColors.secondaryColor,
+              activeColor: widget.activeColor ?? CustomColors.activeColor,
+              toolTip: 'Filters',
+              isActive: _selectedAction == ActionType.filters,
+              onTap: () => setState(() => _selectedAction = ActionType.filters),
+            ),
             CustomIconButton(
-                icon: CupertinoIcons.textbox,
-                inActiveColor: CustomColors.secondaryColor,
-                activeColor: widget.activeColor ?? CustomColors.activeColor,
-                toolTip: 'Text',
-                isActive: _selectedAction == ActionType.text,
-                onTap: () {
-                  setState(() {
-                    _selectedAction = ActionType.text;
-                    isEditorEnable = true;
-                  });
-                  Navigator.of(context)
-                      .push(
-                    PageRouteBuilder(
-                      opaque: false,
-                      pageBuilder: (_, __, ___) => AddText(
-                          activeColor:
-                              widget.activeColor ?? CustomColors.activeColor),
+              icon: CupertinoIcons.textbox,
+              inActiveColor: CustomColors.secondaryColor,
+              activeColor: widget.activeColor ?? CustomColors.activeColor,
+              toolTip: 'Text',
+              isActive: _selectedAction == ActionType.text,
+              onTap: () {
+                setState(() {
+                  _selectedAction = ActionType.text;
+                  isEditorEnable = true;
+                });
+                Navigator.of(context)
+                    .push(
+                  PageRouteBuilder(
+                    opaque: false,
+                    pageBuilder: (_, __, ___) => AddText(
+                      activeColor:
+                          widget.activeColor ?? CustomColors.activeColor,
                     ),
-                  )
-                      .then((value) {
-                    if (value != null) {
-                      Map<TextWidget, dynamic> map;
-                      map = value;
-                      map.addAll({
-                        TextWidget.x: 100.0,
-                        TextWidget.y: 100.0,
-                        TextWidget.xPrev: 100.0,
-                        TextWidget.yPrev: 100.0,
-                        TextWidget.angle: 0.0
-                      });
-                      textWidgets.add(map);
-                    }
-                    setState(() {
-                      isEditorEnable = false;
-                      currentTextIndex = textWidgets.length - 1;
+                  ),
+                )
+                    .then((value) {
+                  if (value != null) {
+                    Map<TextWidget, dynamic> map;
+                    map = value;
+                    map.addAll({
+                      TextWidget.x: 100.0,
+                      TextWidget.y: 100.0,
+                      TextWidget.xPrev: 100.0,
+                      TextWidget.yPrev: 100.0,
+                      TextWidget.angle: 0.0,
                     });
+                    textWidgets.add(map);
+                  }
+                  setState(() {
+                    isEditorEnable = false;
+                    currentTextIndex = textWidgets.length - 1;
                   });
-                }),
+                });
+              },
+            ),
             // CustomIconButton(
             //     icon: CupertinoIcons.hand_draw,
             //     inActiveColor: CustomColors.secondaryColor,
@@ -244,92 +254,98 @@ class _EditImageState extends State<EditImage> {
 
   Widget transform() {
     return Visibility(
-        visible: ActionType.transform == _selectedAction,
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: AvailableOptions(
-                onTap: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CustomIconButton(
-                        icon: CupertinoIcons.rotate_right,
-                        inActiveColor: CustomColors.secondaryColor,
-                        activeColor:
-                            widget.activeColor ?? CustomColors.activeColor,
-                        toolTip: 'Rotate',
-                        margin: const EdgeInsets.only(
-                            left: 10.0, top: 0.0, right: 10.0, bottom: 0.0),
-                        isActive: isRotationActive,
-                        onTap: () {
-                          if (absoluteRotation == 0) {
-                            setState(() {
-                              absoluteRotation = 90;
-                              isRotationActive = true;
-                            });
-                          } else if (absoluteRotation == 90) {
-                            setState(() {
-                              absoluteRotation = 180;
-                              isRotationActive = true;
-                            });
-                          } else if (absoluteRotation == 180) {
-                            setState(() {
-                              absoluteRotation = 270;
-                              isRotationActive = true;
-                            });
-                          } else if (absoluteRotation == 270) {
-                            setState(() {
-                              absoluteRotation = 360;
-                              isRotationActive = false;
-                            });
-                          } else {
-                            setState(() {
-                              absoluteRotation = 90;
-                              isRotationActive = true;
-                            });
-                          }
-                        }),
-                    CustomIconButton(
-                        icon: CupertinoIcons.chevron_left_slash_chevron_right,
-                        inActiveColor: CustomColors.secondaryColor,
-                        activeColor:
-                            widget.activeColor ?? CustomColors.activeColor,
-                        toolTip: 'Flip Horizontal',
-                        margin: const EdgeInsets.only(
-                            left: 10.0, top: 0.0, right: 10.0, bottom: 0.0),
-                        isActive: scaleX.isNegative,
-                        onTap: () {
-                          if (scaleX.isNegative) {
-                            setState(() => scaleX = 1);
-                          } else {
-                            setState(() => scaleX = -1);
-                          }
-                        }),
-                    CustomIconButton(
-                        icon: CupertinoIcons.chevron_up_chevron_down,
-                        inActiveColor: CustomColors.secondaryColor,
-                        activeColor:
-                            widget.activeColor ?? CustomColors.activeColor,
-                        toolTip: 'Flip Vertical',
-                        margin: const EdgeInsets.only(
-                            left: 10.0, top: 0.0, right: 10.0, bottom: 0.0),
-                        isActive: scaleY.isNegative,
-                        onTap: () {
-                          if (scaleY.isNegative) {
-                            setState(() => scaleY = 1);
-                          } else {
-                            setState(() => scaleY = -1);
-                          }
-                        }),
-                  ],
-                ),
+      visible: ActionType.transform == _selectedAction,
+      child: Column(
+        children: [
+          Align(
+            child: AvailableOptions(
+              onTap: () {},
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomIconButton(
+                    icon: CupertinoIcons.rotate_right,
+                    inActiveColor: CustomColors.secondaryColor,
+                    activeColor: widget.activeColor ?? CustomColors.activeColor,
+                    toolTip: 'Rotate',
+                    margin: const EdgeInsets.only(
+                      left: 10.0,
+                      right: 10.0,
+                    ),
+                    isActive: isRotationActive,
+                    onTap: () {
+                      if (absoluteRotation == 0) {
+                        setState(() {
+                          absoluteRotation = 90;
+                          isRotationActive = true;
+                        });
+                      } else if (absoluteRotation == 90) {
+                        setState(() {
+                          absoluteRotation = 180;
+                          isRotationActive = true;
+                        });
+                      } else if (absoluteRotation == 180) {
+                        setState(() {
+                          absoluteRotation = 270;
+                          isRotationActive = true;
+                        });
+                      } else if (absoluteRotation == 270) {
+                        setState(() {
+                          absoluteRotation = 360;
+                          isRotationActive = false;
+                        });
+                      } else {
+                        setState(() {
+                          absoluteRotation = 90;
+                          isRotationActive = true;
+                        });
+                      }
+                    },
+                  ),
+                  CustomIconButton(
+                    icon: CupertinoIcons.chevron_left_slash_chevron_right,
+                    inActiveColor: CustomColors.secondaryColor,
+                    activeColor: widget.activeColor ?? CustomColors.activeColor,
+                    toolTip: 'Flip Horizontal',
+                    margin: const EdgeInsets.only(
+                      left: 10.0,
+                      right: 10.0,
+                    ),
+                    isActive: scaleX.isNegative,
+                    onTap: () {
+                      if (scaleX.isNegative) {
+                        setState(() => scaleX = 1);
+                      } else {
+                        setState(() => scaleX = -1);
+                      }
+                    },
+                  ),
+                  CustomIconButton(
+                    icon: CupertinoIcons.chevron_up_chevron_down,
+                    inActiveColor: CustomColors.secondaryColor,
+                    activeColor: widget.activeColor ?? CustomColors.activeColor,
+                    toolTip: 'Flip Vertical',
+                    margin: const EdgeInsets.only(
+                      left: 10.0,
+                      right: 10.0,
+                    ),
+                    isActive: scaleY.isNegative,
+                    onTap: () {
+                      if (scaleY.isNegative) {
+                        setState(() => scaleY = 1);
+                      } else {
+                        setState(() => scaleY = -1);
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-            changeAngleWidget(_rotationController),
-          ],
-        ));
+          ),
+          changeAngleWidget(_rotationController),
+        ],
+      ),
+    );
   }
 
   Widget changeAngleWidget(ScrollController controller) {
@@ -342,40 +358,41 @@ class _EditImageState extends State<EditImage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: 25,
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: 95,
-                    controller: controller,
-                    itemBuilder: (context, index) => Container(
-                          width: 10,
-                          color: Colors.transparent,
-                          child: const VerticalDivider(
-                            color: Colors.white,
-                            thickness: 1,
-                            indent: 7.5,
-                            endIndent: 7.5,
-                          ),
-                        ))),
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 25,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: 95,
+                controller: controller,
+                itemBuilder: (context, index) => Container(
+                  width: 10,
+                  color: Colors.transparent,
+                  child: const VerticalDivider(
+                    color: Colors.white,
+                    thickness: 1,
+                    indent: 7.5,
+                    endIndent: 7.5,
+                  ),
+                ),
+              ),
+            ),
           ),
           Align(
-            alignment: Alignment.center,
             child: SizedBox(
-              width: 50,
+              width: 80,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "${(rotationValue * 57.3).toStringAsFixed(1)}°",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        color: widget.activeColor ?? CustomColors.activeColor,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
+                      color: widget.activeColor ?? CustomColors.activeColor,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(
                     height: 5.0,
@@ -384,7 +401,7 @@ class _EditImageState extends State<EditImage> {
                     height: 15,
                     width: 1.5,
                     color: widget.activeColor ?? CustomColors.activeColor,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -394,10 +411,12 @@ class _EditImageState extends State<EditImage> {
             child: Container(
               width: 90,
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  CustomColors.primaryColor.withOpacity(0.9),
-                  CustomColors.primaryColor.withOpacity(0.3)
-                ]),
+                gradient: LinearGradient(
+                  colors: [
+                    CustomColors.primaryColor.withOpacity(0.9),
+                    CustomColors.primaryColor.withOpacity(0.3),
+                  ],
+                ),
               ),
             ),
           ),
@@ -407,11 +426,12 @@ class _EditImageState extends State<EditImage> {
               width: 90,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    transform: const GradientRotation(3.14159),
-                    colors: [
-                      CustomColors.primaryColor.withOpacity(0.9),
-                      CustomColors.primaryColor.withOpacity(0.3)
-                    ]),
+                  transform: const GradientRotation(3.14159),
+                  colors: [
+                    CustomColors.primaryColor.withOpacity(0.9),
+                    CustomColors.primaryColor.withOpacity(0.3),
+                  ],
+                ),
               ),
             ),
           ),
@@ -427,79 +447,89 @@ class _EditImageState extends State<EditImage> {
         margin: const EdgeInsets.only(bottom: 10.0),
         height: 70.0,
         child: ListView.builder(
-            itemCount: filters.length,
-            scrollDirection: scrollDirection,
-            controller: _autoScrollController,
-            shrinkWrap: true,
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            physics: const AlwaysScrollableScrollPhysics(),
-            addAutomaticKeepAlives: true,
-            itemBuilder: (context, index) {
-              return AutoScrollTag(
-                key: ValueKey(index),
-                controller: _autoScrollController!,
-                index: index,
-                child: InkWell(
-                  onTap: () async {
-                    setState(() {
-                      selectedFilter = index;
-                    });
-                    await _autoScrollController!.scrollToIndex(selectedFilter,
-                        preferPosition: AutoScrollPosition.middle);
-                  },
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  child: Stack(
-                    alignment: AlignmentDirectional.bottomCenter,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.all(3.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: selectedFilter == index
-                                  ? widget.activeColor ??
-                                      CustomColors.activeColor
-                                  : Colors.transparent),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(5.0)),
+          itemCount: filters.length,
+          scrollDirection: scrollDirection,
+          controller: _autoScrollController,
+          shrinkWrap: true,
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return AutoScrollTag(
+              key: ValueKey(index),
+              controller: _autoScrollController!,
+              index: index,
+              child: InkWell(
+                onTap: () async {
+                  setState(() {
+                    selectedFilter = index;
+                  });
+                  await _autoScrollController!.scrollToIndex(
+                    selectedFilter,
+                    preferPosition: AutoScrollPosition.middle,
+                  );
+                },
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: Stack(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(3.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: selectedFilter == index
+                              ? widget.activeColor ?? CustomColors.activeColor
+                              : Colors.transparent,
                         ),
-                        child: ColorFiltered(
-                          colorFilter:
-                              ColorFilter.matrix(filters[index]['filter']),
-                          child: Container(
-                            width: 60.0,
-                            decoration: BoxDecoration(
-                                color: CustomColors.primaryColor,
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(5.0)),
-                                image: DecorationImage(
-                                  image: FileImage(widget.image),
-                                  fit: BoxFit.cover,
-                                )),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(5.0)),
+                      ),
+                      child: ColorFiltered(
+                        colorFilter:
+                            ColorFilter.matrix(filters[index]['filter']),
+                        child: Container(
+                          width: 60.0,
+                          decoration: BoxDecoration(
+                            color: CustomColors.primaryColor,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(5.0),
+                            ),
+                            image: DecorationImage(
+                              image: FileImage(widget.image),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
-                      Positioned(
-                          bottom: 8,
-                          child: Container(
-                            decoration: const BoxDecoration(boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 5,
-                                  spreadRadius: 1)
-                            ]),
-                            child: Text(
-                              filters[index]['name'],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 12),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 5,
+                              spreadRadius: 1,
                             ),
-                          ))
-                    ],
-                  ),
+                          ],
+                        ),
+                        child: Text(
+                          filters[index]['name'],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -511,50 +541,57 @@ class _EditImageState extends State<EditImage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Visibility(
-              visible: currentTextIndex != null,
-              child: changeAngleWidget(_textRotationController)),
+            visible: currentTextIndex != null,
+            child: changeAngleWidget(_textRotationController),
+          ),
           AvailableOptions(
-              child: const Text(
-                'Add Text',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              padding: const EdgeInsets.only(
-                  left: 40, right: 40, top: 10, bottom: 10),
-              onTap: () {
-                setState(() {
-                  isEditorEnable = true;
-                });
-                Navigator.of(context)
-                    .push(
-                  PageRouteBuilder(
-                    opaque: false,
-                    pageBuilder: (_, __, ___) => AddText(
-                        activeColor:
-                            widget.activeColor ?? CustomColors.activeColor),
+            padding: const EdgeInsets.only(
+              left: 40,
+              right: 40,
+              top: 10,
+              bottom: 10,
+            ),
+            onTap: () {
+              setState(() {
+                isEditorEnable = true;
+              });
+              Navigator.of(context)
+                  .push(
+                PageRouteBuilder(
+                  opaque: false,
+                  pageBuilder: (_, __, ___) => AddText(
+                    activeColor: widget.activeColor ?? CustomColors.activeColor,
                   ),
-                )
-                    .then((value) {
-                  if (value != null) {
-                    Map<TextWidget, dynamic> map;
-                    map = value;
-                    map.addAll({
-                      TextWidget.x: 100.0,
-                      TextWidget.y: 100.0,
-                      TextWidget.xPrev: 100.0,
-                      TextWidget.yPrev: 100.0,
-                      TextWidget.angle: 0.0
-                    });
-                    textWidgets.add(map);
-                  }
-                  setState(() {
-                    isEditorEnable = false;
-                    currentTextIndex = textWidgets.length - 1;
+                ),
+              )
+                  .then((value) {
+                if (value != null) {
+                  Map<TextWidget, dynamic> map;
+                  map = value;
+                  map.addAll({
+                    TextWidget.x: 100.0,
+                    TextWidget.y: 100.0,
+                    TextWidget.xPrev: 100.0,
+                    TextWidget.yPrev: 100.0,
+                    TextWidget.angle: 0.0,
                   });
+                  textWidgets.add(map);
+                }
+                setState(() {
+                  isEditorEnable = false;
+                  currentTextIndex = textWidgets.length - 1;
                 });
-              }),
+              });
+            },
+            child: const Text(
+              'Add Text',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -575,7 +612,6 @@ class _EditImageState extends State<EditImage> {
       child: Stack(
         children: [
           Align(
-            alignment: Alignment.center,
             child: RepaintBoundary(
               key: _globalKey,
               child: Stack(
@@ -588,9 +624,11 @@ class _EditImageState extends State<EditImage> {
                       child: Transform.rotate(
                         angle: rotationValue,
                         child: ColorFiltered(
-                            colorFilter: ColorFilter.matrix(
-                                filters[selectedFilter]['filter']),
-                            child: Image.file(widget.image)),
+                          colorFilter: ColorFilter.matrix(
+                            filters[selectedFilter]['filter'],
+                          ),
+                          child: Image.file(widget.image),
+                        ),
                       ),
                     ),
                   ),
@@ -606,254 +644,261 @@ class _EditImageState extends State<EditImage> {
 
   List<Widget> textPainter() {
     return List.generate(
-        textWidgets.length,
-        (index) => Visibility(
-              visible: textWidgets.isNotEmpty &&
-                  textWidgets[index][TextWidget.visibility],
-              child: Positioned(
-                left: textWidgets[index][TextWidget.x],
-                top: textWidgets[index][TextWidget.y],
-                child: GestureDetector(
-                  onPanDown: (d) {
-                    textWidgets[index][TextWidget.xPrev] =
-                        textWidgets[index][TextWidget.x];
-                    textWidgets[index][TextWidget.yPrev] =
-                        textWidgets[index][TextWidget.y];
-                  },
-                  onHorizontalDragEnd: (details) {},
-                  onHorizontalDragUpdate: (details) {
-                    setState(() {
-                      textWidgets[index][TextWidget.x] = textWidgets[index]
-                              [TextWidget.xPrev] +
-                          details.localPosition.dx;
-                      textWidgets[index][TextWidget.y] = textWidgets[index]
-                              [TextWidget.yPrev] +
-                          details.localPosition.dy;
+      textWidgets.length,
+      (index) => Visibility(
+        visible:
+            textWidgets.isNotEmpty && textWidgets[index][TextWidget.visibility],
+        child: Positioned(
+          left: textWidgets[index][TextWidget.x],
+          top: textWidgets[index][TextWidget.y],
+          child: GestureDetector(
+            onPanDown: (d) {
+              textWidgets[index][TextWidget.xPrev] =
+                  textWidgets[index][TextWidget.x];
+              textWidgets[index][TextWidget.yPrev] =
+                  textWidgets[index][TextWidget.y];
+            },
+            onHorizontalDragEnd: (details) {},
+            onHorizontalDragUpdate: (details) {
+              setState(() {
+                textWidgets[index][TextWidget.x] = textWidgets[index]
+                        [TextWidget.xPrev] +
+                    details.localPosition.dx;
+                textWidgets[index][TextWidget.y] = textWidgets[index]
+                        [TextWidget.yPrev] +
+                    details.localPosition.dy;
+              });
+            },
+            onVerticalDragEnd: (details) {},
+            onVerticalDragUpdate: (details) {
+              setState(() {
+                textWidgets[index][TextWidget.x] = textWidgets[index]
+                        [TextWidget.xPrev] +
+                    details.localPosition.dx;
+                textWidgets[index][TextWidget.y] = textWidgets[index]
+                        [TextWidget.yPrev] +
+                    details.localPosition.dy;
+              });
+            },
+            onTap: () {
+              if (textWidgets[index][TextWidget.borderColorStatus]) {
+                setState(() {
+                  isEditorEnable = true;
+                  textWidgets[index][TextWidget.visibility] = false;
+                });
+                Navigator.of(context)
+                    .push(
+                  PageRouteBuilder(
+                    opaque: false,
+                    pageBuilder: (_, __, ___) => AddText(
+                      initialData: {
+                        TextWidget.key: textWidgets[index][TextWidget.key],
+                        TextWidget.text: textWidgets[index][TextWidget.text],
+                        TextWidget.align: textWidgets[index][TextWidget.align],
+                        TextWidget.boxType: textWidgets[index]
+                            [TextWidget.boxType],
+                        TextWidget.borderColorStatus: textWidgets[index]
+                            [TextWidget.borderColorStatus],
+                        TextWidget.boxColorIndex: textWidgets[index]
+                            [TextWidget.boxColorIndex],
+                        TextWidget.visibility: textWidgets[index]
+                            [TextWidget.visibility],
+                        TextWidget.textSize: textWidgets[index]
+                            [TextWidget.textSize],
+                      },
+                      activeColor:
+                          widget.activeColor ?? CustomColors.activeColor,
+                    ),
+                  ),
+                )
+                    .then((value) {
+                  if (value != null) {
+                    Map<TextWidget, dynamic> map;
+                    map = value;
+                    map.addAll({
+                      TextWidget.x: textWidgets[index][TextWidget.x] ?? 100.0,
+                      TextWidget.y: textWidgets[index][TextWidget.y] ?? 100.0,
+                      TextWidget.xPrev:
+                          textWidgets[index][TextWidget.xPrev] ?? 100.0,
+                      TextWidget.yPrev:
+                          textWidgets[index][TextWidget.yPrev] ?? 100.0,
+                      TextWidget.angle:
+                          textWidgets[index][TextWidget.angle] ?? 0.0,
                     });
-                  },
-                  onVerticalDragEnd: (details) {},
-                  onVerticalDragUpdate: (details) {
-                    setState(() {
-                      textWidgets[index][TextWidget.x] = textWidgets[index]
-                              [TextWidget.xPrev] +
-                          details.localPosition.dx;
-                      textWidgets[index][TextWidget.y] = textWidgets[index]
-                              [TextWidget.yPrev] +
-                          details.localPosition.dy;
-                    });
-                  },
-                  onTap: () {
-                    if (textWidgets[index][TextWidget.borderColorStatus]) {
+                    textWidgets[index] = map;
+                  }
+                  setState(() {
+                    isEditorEnable = false;
+                    currentTextIndex = textWidgets.length - 1;
+                  });
+                });
+              } else {
+                if (textWidgets.isNotEmpty) {
+                  for (var i = 0; i < textWidgets.length; i++) {
+                    if (i == index) {
+                      textWidgets[i][TextWidget.borderColorStatus] = true;
                       setState(() {
-                        isEditorEnable = true;
-                        textWidgets[index][TextWidget.visibility] = false;
-                      });
-                      Navigator.of(context)
-                          .push(
-                        PageRouteBuilder(
-                          opaque: false,
-                          pageBuilder: (_, __, ___) => AddText(
-                              initialData: {
-                                TextWidget.key: textWidgets[index]
-                                    [TextWidget.key],
-                                TextWidget.text: textWidgets[index]
-                                    [TextWidget.text],
-                                TextWidget.align: textWidgets[index]
-                                    [TextWidget.align],
-                                TextWidget.boxType: textWidgets[index]
-                                    [TextWidget.boxType],
-                                TextWidget.borderColorStatus: textWidgets[index]
-                                    [TextWidget.borderColorStatus],
-                                TextWidget.boxColorIndex: textWidgets[index]
-                                    [TextWidget.boxColorIndex],
-                                TextWidget.visibility: textWidgets[index]
-                                    [TextWidget.visibility],
-                                TextWidget.textSize: textWidgets[index]
-                                    [TextWidget.textSize]
-                              },
-                              activeColor: widget.activeColor ??
-                                  CustomColors.activeColor),
-                        ),
-                      )
-                          .then((value) {
-                        if (value != null) {
-                          Map<TextWidget, dynamic> map;
-                          map = value;
-                          map.addAll({
-                            TextWidget.x:
-                                textWidgets[index][TextWidget.x] ?? 100.0,
-                            TextWidget.y:
-                                textWidgets[index][TextWidget.y] ?? 100.0,
-                            TextWidget.xPrev:
-                                textWidgets[index][TextWidget.xPrev] ?? 100.0,
-                            TextWidget.yPrev:
-                                textWidgets[index][TextWidget.yPrev] ?? 100.0,
-                            TextWidget.angle:
-                                textWidgets[index][TextWidget.angle] ?? 0.0,
-                          });
-                          textWidgets[index] = map;
-                        }
-                        setState(() {
-                          isEditorEnable = false;
-                          currentTextIndex = textWidgets.length - 1;
-                        });
+                        currentTextIndex = i;
                       });
                     } else {
-                      if (textWidgets.isNotEmpty) {
-                        for (var i = 0; i < textWidgets.length; i++) {
-                          if (i == index) {
-                            textWidgets[i][TextWidget.borderColorStatus] = true;
-                            setState(() {
-                              currentTextIndex = i;
-                            });
-                          } else {
-                            textWidgets[i][TextWidget.borderColorStatus] =
-                                false;
-                          }
-                        }
-                      }
+                      textWidgets[i][TextWidget.borderColorStatus] = false;
                     }
-                  },
-                  child: textWidgets.isNotEmpty
-                      ? Transform.rotate(
-                          angle: textWidgets[index][TextWidget.angle],
-                          child: Stack(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.only(
-                                    left: 10, right: 10, top: 5, bottom: 5),
-                                margin: const EdgeInsets.only(
-                                    left: 5, right: 5, top: 5, bottom: 5),
-                                decoration: BoxDecoration(
-                                    color: textWidgets[index]
-                                                [TextWidget.boxType] ==
-                                            BoxType.white
-                                        ? CustomColors.allColors[
-                                            textWidgets[index]
-                                                [TextWidget.boxColorIndex]]
-                                        : textWidgets[index]
-                                                    [TextWidget.boxType] ==
-                                                BoxType.faintWhite
-                                            ? CustomColors
-                                                .allColors[textWidgets[index]
-                                                    [TextWidget.boxColorIndex]]
-                                                .withOpacity(0.6)
-                                            : Colors.transparent,
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(6.0))),
-                                child: Center(
-                                  child: Text(
-                                    textWidgets[index][TextWidget.text],
-                                    textAlign: textWidgets[index]
-                                                [TextWidget.align] ==
-                                            TextDirectionValue.left
-                                        ? TextAlign.left
-                                        : textWidgets[index]
-                                                    [TextWidget.align] ==
-                                                TextDirectionValue.center
-                                            ? TextAlign.center
-                                            : TextAlign.right,
-                                    style: TextStyle(
-                                        fontFamily: "Highup",
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: textWidgets[index]
-                                            [TextWidget.textSize],
-                                        color: textWidgets[index][
-                                                    TextWidget.boxColorIndex] ==
-                                                1
-                                            ? Colors.white
-                                            : Colors.black),
-                                  ),
-                                ),
-                              ),
-                              Visibility(
-                                visible: textWidgets[index]
-                                    [TextWidget.borderColorStatus],
-                                child: Positioned(
-                                  top: 0,
-                                  child: Container(
-                                    height: 15,
-                                    width: 15,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.grey)),
-                                  ),
-                                ),
-                              ),
-                              Visibility(
-                                visible: textWidgets[index]
-                                    [TextWidget.borderColorStatus],
-                                child: Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () => setState(
-                                        () => textWidgets.removeAt(index)),
-                                    child: Container(
-                                      height: 20,
-                                      width: 20,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          border:
-                                              Border.all(color: Colors.grey)),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.clear,
-                                          color: Colors.deepOrange,
-                                          size: 12,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Visibility(
-                                visible: textWidgets[index]
-                                    [TextWidget.borderColorStatus],
-                                child: Positioned(
-                                  bottom: 0,
-                                  left: 0,
-                                  child: Container(
-                                    height: 15,
-                                    width: 15,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.grey)),
-                                  ),
-                                ),
-                              ),
-                              Visibility(
-                                visible: textWidgets[index]
-                                    [TextWidget.borderColorStatus],
-                                child: Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    height: 15,
-                                    width: 15,
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.grey)),
-                                  ),
-                                ),
-                              )
-                            ],
+                  }
+                }
+              }
+            },
+            child: textWidgets.isNotEmpty
+                ? Transform.rotate(
+                    angle: textWidgets[index][TextWidget.angle],
+                    child: Stack(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                            top: 5,
+                            bottom: 5,
                           ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-              ),
-            ));
+                          margin: const EdgeInsets.only(
+                            left: 5,
+                            right: 5,
+                            top: 5,
+                            bottom: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: textWidgets[index][TextWidget.boxType] ==
+                                    BoxType.white
+                                ? CustomColors.allColors[textWidgets[index]
+                                    [TextWidget.boxColorIndex]]
+                                : textWidgets[index][TextWidget.boxType] ==
+                                        BoxType.faintWhite
+                                    ? CustomColors.allColors[textWidgets[index]
+                                            [TextWidget.boxColorIndex]]
+                                        .withOpacity(0.6)
+                                    : Colors.transparent,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(6.0),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              textWidgets[index][TextWidget.text],
+                              textAlign: textWidgets[index][TextWidget.align] ==
+                                      TextDirectionValue.left
+                                  ? TextAlign.left
+                                  : textWidgets[index][TextWidget.align] ==
+                                          TextDirectionValue.center
+                                      ? TextAlign.center
+                                      : TextAlign.right,
+                              style: TextStyle(
+                                fontFamily: "Highup",
+                                fontWeight: FontWeight.w400,
+                                fontSize: textWidgets[index]
+                                    [TextWidget.textSize],
+                                color: textWidgets[index]
+                                            [TextWidget.boxColorIndex] ==
+                                        1
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: textWidgets[index]
+                              [TextWidget.borderColorStatus],
+                          child: Positioned(
+                            top: 0,
+                            child: Container(
+                              height: 15,
+                              width: 15,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: textWidgets[index]
+                              [TextWidget.borderColorStatus],
+                          child: Positioned(
+                            top: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () => setState(
+                                () => textWidgets.removeAt(index),
+                              ),
+                              child: Container(
+                                height: 20,
+                                width: 20,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.grey),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.clear,
+                                    color: Colors.deepOrange,
+                                    size: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: textWidgets[index]
+                              [TextWidget.borderColorStatus],
+                          child: Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: Container(
+                              height: 15,
+                              width: 15,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: textWidgets[index]
+                              [TextWidget.borderColorStatus],
+                          child: Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              height: 15,
+                              width: 15,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget? buildEmptyCounter(BuildContext context,
-          {required int currentLength,
-          int? maxLength,
-          required bool isFocused}) =>
+  Widget? buildEmptyCounter(
+    BuildContext context, {
+    required int currentLength,
+    int? maxLength,
+    required bool isFocused,
+  }) =>
       null;
 
   /// Main method responsible to render new image by using repaint boundary
@@ -866,9 +911,10 @@ class _EditImageState extends State<EditImage> {
       double dpr = ui.window.devicePixelRatio;
       ui.Image image =
           await boundary.toImage(pixelRatio: widget.pixelRatio ?? dpr);
-      ByteData? _byteData =
+      ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
-      return _byteData!;
+
+      return byteData!;
     } catch (e) {
       rethrow;
     }

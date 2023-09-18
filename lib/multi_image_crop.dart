@@ -9,24 +9,27 @@ import 'package:multi_image_crop/src/multi_image_crop.dart';
 /// parameter [aspectRatio] is ratio of image in which image will crop.
 
 class MultiImageCrop {
-  static startCropping(
-      {required BuildContext context,
-      required List<File> files,
-      required double aspectRatio,
-      bool alwaysShowGrid = false,
-      double? pixelRatio,
-      Color? activeColor,
-      required Function callBack}) async {
+  static startCropping({
+    required BuildContext context,
+    required List<File> files,
+    required double aspectRatio,
+    bool alwaysShowGrid = false,
+    double? pixelRatio,
+    Color? activeColor,
+    required Function callBack,
+  }) async {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MultiImageCropService(
-                  files: files,
-                  pixelRatio: pixelRatio,
-                  activeColor: activeColor,
-                  alwaysShowGrid: alwaysShowGrid,
-                  aspectRatio: aspectRatio,
-                ))).then((value) {
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiImageCropService(
+          files: files,
+          pixelRatio: pixelRatio,
+          activeColor: activeColor,
+          alwaysShowGrid: alwaysShowGrid,
+          aspectRatio: aspectRatio,
+        ),
+      ),
+    ).then((value) {
       if (value != null) {
         callBack(value);
       }
