@@ -114,7 +114,7 @@ class _MultiImageCropServiceState extends State<MultiImageCropService>
 
   PreferredSizeWidget utilityAppBar() {
     return AppBar(
-      title: titleVisible ? Text(
+      title: widget.titleVisible ? Text(
         files.length.toString(),
         style:
             const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
